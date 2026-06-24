@@ -1,0 +1,50 @@
+name: Bug 报告
+description: 参考实现或协议文档有问题
+title: "[BUG] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Bug 报告
+        感谢你帮助改进这个项目！
+  - type: dropdown
+    id: area
+    attributes:
+      label: 问题区域
+      options:
+        - Python 参考实现
+        - 协议文档 (SPEC.md)
+        - 方法论 (METHODOLOGY.md)
+        - 示例技能
+        - 其他
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 发生了什么？预期应该发生什么？
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现步骤
+      description: 如何让这个问题重现？
+      placeholder: |
+        1. 安装 skill-protocol
+        2. 运行 skill-protocol validate xxx.md
+        3. 看到错误信息
+  - type: input
+    id: version
+    attributes:
+      label: 版本
+      description: 你使用的协议版本或 commit hash
+      placeholder: v0.1.0 / commit abc123
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志/截图
+      description: 如果有错误日志或截图，请贴在这里
+      render: shell

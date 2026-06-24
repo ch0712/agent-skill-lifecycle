@@ -1,0 +1,44 @@
+name: 集成案例分享
+description: 分享你将本协议集成到某个 Agent 框架的经验
+title: "[INTEGRATION] 集成到 "
+labels: [integration]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 集成案例分享
+        感谢你分享经验！这将帮助更多人将协议应用到实际项目。
+  - type: input
+    id: framework
+    attributes:
+      label: 目标框架
+      description: 你集成了哪个 Agent 框架？
+      placeholder: Claude Code / LangChain / AutoGPT / 自研框架
+    validations:
+      required: true
+  - type: textarea
+    id: approach
+    attributes:
+      label: 集成方式
+      description: 你是怎么集成的？用了参考实现还是自己解析？
+      placeholder: 选用了 Python 参考实现的 parser + matcher，只改了一层封装
+    validations:
+      required: true
+  - type: textarea
+    id: challenges
+    attributes:
+      label: 遇到的挑战
+      description: 集成过程中有什么困难？协议有没有缺失的部分？
+  - type: textarea
+    id: result
+    attributes:
+      label: 效果
+      description: 集成后 Agent 的自我进化能力有何变化？
+      placeholder: Agent 现在能在完成复杂任务后自动创建技能，技能复用率从 0 提升到 60%
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 确认
+      options:
+        - label: 我愿意公开分享这个集成案例
+          required: true

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discussions
+    url: https://github.com/ch0712/agent-skill-lifecycle/discussions
+    about: 提出想法、讨论最佳实践、分享使用案例
+  - name: 协议文档
+    url: https://github.com/ch0712/agent-skill-lifecycle/blob/main/SPEC.md
+    about: 阅读完整的 SKILL.md 协议规范

@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml pytest
+
+      - name: Run tests
+        run: |
+          PYTHONPATH=python python -m pytest python/tests/ -v
+
+      - name: Validate example skills
+        run: |
+          PYTHONPATH=python python -c "
+          from skill_protocol.validator import validate_all
+          results = validate_all('.')
+          errors = [(r['file'], r['errors']) for r in results if not r['valid']]
+          if errors:
+              for f, es in errors:
+                  for e in es:
+                      print(f'  ❌ {f}: {e}')
+              exit(1)
+          else:
+              print(f'  ✅  All {len(results)} skills valid')
+          "
