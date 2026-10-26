@@ -49,3 +49,32 @@
 - [ ] 打 v1.0.0 tag + GitHub Release（让 `watch star fork` 有落点）
 - [ ] PyPI 上架（确认包名可用 → twine upload）
 - [ ] 写 1 篇对外可读的落地案例（用本机 Hermes 真实技能库做 example，比空协议有说服力）
+
+---
+
+## 社区巡检（2026-10-26，子冶周报 · 第 2 周）
+
+| 指标 | 实测值 | 环比 10-19 |
+|:--|:--|:--|
+| Stars / Watchers | 0 / 0 | 持平 |
+| Forks | 0 | 持平 |
+| Issues（累计/开放） | 0 / 0 | 持平 |
+| PRs（累计/开放） | 0 / 0 | 持平 |
+| Tags / Releases | 0 / 0 | 持平（仍无落点） |
+| PyPI | 404 未发布 | 持平 |
+| 最近 commit | `489245b` 2026-10-19（上周巡检自身写入） | 本周 0 commit |
+| description / topics | null / `[]` | **未修** |
+| `pushed_at` | 2026-10-19T02:01:36Z | 7 天无变化 |
+
+### 本周（10-19 ~ 10-26）新增
+- 0 Issue / 0 PR / 0 Star / 0 Fork / 0 commit / 0 fork 事件。**连续第 2 周完全静默。**
+
+### 结论
+静默不是本周新问题，而是**上周诊断未执行**的结果。10-19 已定位三个分发缺口
+（无 description/topics、未发布 PyPI、无 tag/Release/任何对外分发动作），
+本周复核这 4 个待补项**全部仍未动**。数字不会自己变，执行侧是唯一变量。
+
+### 阻塞
+- 无 GitHub PAT（`~/.hermes/.env` 中 `GITHUB_TOKEN` 处于注释态）→ traffic/views、
+  popular/referrers 等需要 push 权限的流量接口无法读取，只能拿公开计数。
+  补发 PAT 后可回答"到底有没有人来过"这一关键问题（0 反馈=没人来 vs 来了没转化）。
