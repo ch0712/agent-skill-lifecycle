@@ -78,3 +78,64 @@
 - 无 GitHub PAT（`~/.hermes/.env` 中 `GITHUB_TOKEN` 处于注释态）→ traffic/views、
   popular/referrers 等需要 push 权限的流量接口无法读取，只能拿公开计数。
   补发 PAT 后可回答"到底有没有人来过"这一关键问题（0 反馈=没人来 vs 来了没转化）。
+
+---
+
+## 社区巡检（2026-11-02，子冶周报 · 第 3 周）
+
+| 指标 | 实测值 | 环比 10-26 |
+|:--|:--|:--|
+| Stars / Watchers | 0 / 0 | 持平 |
+| Forks | 0 | 持平 |
+| Issues（累计/开放） | 0 / 0 | 持平 |
+| PRs（累计/开放） | 0 / 0 | 持平 |
+| Tags / Releases | 0 / 0 | 持平 |
+| PyPI | `skill-protocol` / `agent-skill-lifecycle` / `agent-skill-lifecycle-protocol` 三个名字全部 404 | **名字仍可用，未被抢注** |
+| Contributors | `[]`（空数组） | 持平 |
+| 最近 push | 2026-10-26T02:00:52Z（上周周报自身 commit `9bb8faf`） | 本周 0 commit |
+| description / topics | null / `[]` | **仍未修（第 3 周）** |
+| GitHub 事件流 | 仅 2 条 PushEvent，均为自身巡检 | 无外部交互 |
+
+### 本周（10-26 ~ 11-02）新增
+- 0 Issue / 0 PR / 0 Star / 0 Fork / 0 commit / 0 clone（无 token，clone 数不可读）。**连续第 3 周完全静默。**
+
+### 本周新发现：仓库自身功能存在 4 处「静默失败」（此前两周未检查到）
+用本机直接跑参考实现复核，实测（命令与输出逐字记录）：
+
+1. **CI 的 skill 校验步骤是空转门闸**
+   `.github/workflows/ci.yml` 里 `validate_all('.')` → 实测 `validated 0 skills`，
+   CI 打印「✅ All 0 skills valid」永远通过。
+   根因：`validator.validate_all()` 只 `rglob("SKILL.md")`，而仓库唯一的示例是
+   `examples/systematic-debugging.md`（非 SKILL.md 命名）→ 一个文件都没被校验。
+2. **README 写的 `skill-protocol lifecycle check <dir>` 命令不存在**
+   实测该命令 **exit=0 且零输出**。根因：`cli.py` 实现是 `lifecycle <dir>`，
+   把字面量 `check` 当成目录名传进 `LifecycleManager('check')` → 扫不到任何文件，
+   静默返回空列表，退出码仍是 0（典型 fail-silent）。
+3. **`health <dir>` 对扁平 .md 目录零输出**
+   实测 `health examples/` → 空输出。同理受 `_SKILL_FILENAME = "SKILL.md"` 限制，
+   `lifecycle.py` 只认 SKILL.md。
+4. **`setup.py` 的 `url` 指向 Gitee 私有仓**
+   `url="https://gitee.com/xumijie/agent-skill-lifecycle"` — 若上 PyPI，
+   主页链接会把用户导去 Gitee，而不是公开的 GitHub 仓。且缺 `long_description`
+   （PyPI 页面会是空白描述）。
+
+对照 `validate` 单文件：`validate examples/systematic-debugging.md` → `✅ Valid`，exit=0（这条是正常的）。
+
+### 结论（第 3 周，判断变更）
+前两周结论是「分发缺口 → 数字不会自己变」。本周补充一条更硬的判断：
+**即使有人来，也会踩到 2 个静默失败命令（`lifecycle check` / `health`）而得不到任何反馈**。
+即「0 反馈」不能全部归因于「没人来」，仓库自身的空转门闸 + 静默命令至少在
+验证环节不成立。修复顺序应调到分发动作**之前**：先让 `npm/pip 装完能用`，
+再谈发 tag / 上 PyPI / 写案例。
+
+### 待办（优先级重排，第 3 版）
+- [ ] P0 修 `validate_all` / `LifecycleManager` 的扫描口径（接受 `.md` 或把示例改名为 `SKILL.md`），并让 CI 在「0 个 skill 被校验」时 fail
+- [ ] P0 修 CLI：`lifecycle check <dir>` 按 README 实现，未知子命令必须非 0 退出
+- [ ] P1 补 `description` + 5 个 topics（此前 3 周未动）
+- [ ] P1 `setup.py`：url 改 GitHub、补 `long_description`（读 README）
+- [ ] P2 打 v1.0.0 tag + Release；PyPI 上架（名字已验证可用）
+- [ ] P2 用本机 Hermes 真实技能库写 1 篇落地案例
+
+### 阻塞（未变）
+- 无 GitHub PAT（`~/.hermes/.env` 的 `GITHUB_TOKEN` 仍注释）→ `/traffic/views` 401，
+  无法区分「没人来」vs「来了没转化」。这是回答「0 反馈根因」的唯一硬数据，建议补 PAT。
