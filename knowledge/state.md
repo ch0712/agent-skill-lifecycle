@@ -139,3 +139,70 @@
 ### 阻塞（未变）
 - 无 GitHub PAT（`~/.hermes/.env` 的 `GITHUB_TOKEN` 仍注释）→ `/traffic/views` 401，
   无法区分「没人来」vs「来了没转化」。这是回答「0 反馈根因」的唯一硬数据，建议补 PAT。
+
+---
+
+## 社区巡检（2026-11-09，子冶周报 · 第 4 周）
+
+| 指标 | 实测值 | 环比 11-02 |
+|:--|:--|:--|
+| Stars / Watchers | 0 / 0 | 持平 |
+| Forks | 0（`/forks` 空数组） | 持平 |
+| Issues（累计/开放） | 0 / 0 | 持平 |
+| PRs（累计/开放） | 0 / 0 | 持平 |
+| Tags / Releases | 0 / 0 | 持平 |
+| Contributors | `[]`（空数组） | 持平 |
+| PyPI | `agent-skill-lifecycle` / `skill-protocol` / `agent-skill-lifecycle-protocol` 均 404 | 名字仍可用 |
+| 最近 push | 2026-11-02T02:04:25Z（上周周报自身 commit `ae17fe7`） | 本周 0 commit |
+| description / topics | null / `[]` | **仍未修（第 4 周）** |
+| GitHub 事件流 | 共 3 条，全部是本账号自身 PushEvent（10-19 / 10-26 / 11-02） | 无外部交互 |
+| CI | 5 次 run 全部 `success`，含 3 次纯文档 commit | 门闸从未拦下任何东西 |
+
+### 本周（11-02 ~ 11-09）新增
+- 0 Issue / 0 PR / 0 Star / 0 Fork / 0 commit / 0 外部事件。**连续第 4 周完全静默。**
+
+### 本周复核：上周 4 处静默失败 **全部未修**，并补齐 1 条根因证据
+用本机参考实现逐条重跑（`PYTHONPATH=python`，命令与输出逐字记录）：
+
+1. `validate_all('.')` → `validated: 0`，exit=0。CI 打印「✅ All 0 skills valid」永远绿。
+   根因确认：`validator.py:48` `base.rglob("SKILL.md")`，而仓库唯一示例是
+   `examples/systematic-debugging.md`（不含 SKILL.md 命名）。
+2. `lifecycle check examples/` → **零输出，exit=0**。根因确认：`cli.py:67` 把 `sys.argv[2]`
+   当目录，字面量 `check` 被当作目录名 → 0 个技能 → 空列表 → 静默成功。
+3. `lifecycle examples/`（文档所称的正确实现）→ **同样零输出，exit=0**。
+   → 说明不只是 `check` 字面量问题，`_SKILL_FILENAME = "SKILL.md"`（`lifecycle.py:11`）
+   这个扫描口径才是主因，两个入口一起死。
+4. `health examples/` → 零输出，exit=0（同因）。
+5. `setup.py:9` `url` 仍指向 `gitee.com/xumijie/agent-skill-lifecycle`（私有仓），
+   且仍无 `long_description`（上 PyPI 会渲染空白描述页）。
+
+### 本周新增发现
+- **`--help` 不可用**：`skill-protocol --help` → `Unknown command: --help`，exit=1。
+  只有裸执行才打印 usage。开源工具第一条命令就撞墙。
+- **对照组证明核心算法没问题**：把示例复制成规范命名的 `demo/SKILL.md` 后，
+  `validate-all` → `1/1 skills valid`、`health` → `9.5/10 [active]`、`lifecycle` → `keep`，全绿。
+  → 缺陷 100% 在扫描口径与命令契约，不在协议/打分逻辑。修复面很小。
+- CI 5 次 run 全 success（含 3 次纯文档 commit）→ 印证「空转门闸」：门闸从未有拦截能力。
+
+### 已备好可落地补丁（**未提交，待批准**）
+`/root/.hermes/workspace/ziye-drafts/2026-11-09-silent-failure-fix.patch`（174 行，4 文件）：
+1. `examples/systematic-debugging.md` → `examples/systematic-debugging/SKILL.md`（让示例符合协议扫描口径）
+2. `cli.py`：支持 `-h/--help/help`；`lifecycle [check] <dir>` 兼容 README 写法；
+   未知命令打印 usage 并 exit 1；`validate-all/health/lifecycle` 扫到 0 个技能时 **fail loud（exit 2）**；
+   `validate-all` 有非法技能时 exit 1（原来恒 0）
+3. `ci.yml`：`validate_all` 返回 0 个文件时 exit 1（门闸不再空转）
+4. `setup.py`：url 改 GitHub、补 `long_description`（读 README）+ `project_urls`
+
+验证：临时副本 `/root/zy_draft` 内全部 README 命令实跑通过
+（`--help` exit 0 / `validate-all` 1/1 / `health examples/` 9.5分 / `lifecycle check examples/` keep）；
+`git apply --check` 对真实仓库通过，仓库工作区未被改动。
+
+### 待办（第 4 版）
+- [ ] **P0 应用上述补丁**（一条命令：`git apply` → 跑命令回归 → commit → push）
+- [ ] P1 补 `description` + 5 个 topics（连续 4 周未动，是零成本流量入口）
+- [ ] P2 打 v1.0.0 tag + Release；PyPI 上架（`skill-protocol` 名字仍可用）
+- [ ] P2 用本机 Hermes 真实技能库写 1 篇落地案例
+
+### 阻塞（未变）
+- 无 GitHub PAT（`~/.hermes/.env:371` `GITHUB_TOKEN` 仍注释）→ `/traffic/views`、`/traffic/clones`
+  401，无法区分「没人来」vs「来了没转化」。这也是判断「静默根因」的唯一硬数据。
