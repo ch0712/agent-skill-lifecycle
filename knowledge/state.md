@@ -206,3 +206,69 @@
 ### 阻塞（未变）
 - 无 GitHub PAT（`~/.hermes/.env:371` `GITHUB_TOKEN` 仍注释）→ `/traffic/views`、`/traffic/clones`
   401，无法区分「没人来」vs「来了没转化」。这也是判断「静默根因」的唯一硬数据。
+
+---
+
+## 社区巡检（2026-11-16，子冶周报 · 第 5 周）
+
+| 指标 | 实测值 | 环比 11-09 |
+|:--|:--|:--|
+| Stars / Watchers | 0 / 0 | 持平 |
+| Forks | 0（`/forks` 空数组） | 持平 |
+| Issues（累计/开放） | 0 / 0 | 持平 |
+| PRs（累计/开放） | 0 / 0 | 持平 |
+| Tags / Releases | 0 / 0 | 持平 |
+| Contributors | `[]` | 持平 |
+| PyPI（`skill-protocol` / `agent-skill-lifecycle`） | 均 **404** | 名字仍可用，仍无包 |
+| 最近 push | 2026-11-09T02:02:36Z（上周周报自身 commit `0d25a43`） | 本周 0 commit |
+| description / topics | null / `[]` | **仍未修（第 5 周）** |
+| GitHub 事件流 | 4 条，全部本账号 PushEvent（10-19 / 10-26 / 11-02 / 11-09） | 外部交互 0 |
+| CI | 6 次 run 全 `success`（含 4 次纯文档 commit） | 门闸仍无拦截能力 |
+
+### 本周（11-09 ~ 11-16）新增
+- 0 Issue / 0 PR / 0 Star / 0 Fork / 0 commit / 0 外部事件。**连续第 5 周完全静默。**
+
+### 本周新维度：赛道基准法（前 4 周从未做）— 一次性证伪「没人来」
+用 GitHub Search API 按同义查询抓同赛道对手（`sort=stars`，实跑记录）：
+
+| 查询 | total_count | Top 对手（★ / 描述要点） | 我们是否进前 10 |
+|:--|--:|:--|:--|
+| `skill lifecycle agent` | 656 | **FrancyJGLisboa/agent-skills-platform 2416★**（266 fork / 9 issue「govern their lifecycle: evidence, discovery, updates, rollback, quarantine, 17-platform distribution」）、MemTensor/skills-vote 309★（"Lifecycle Governance of Agent Skills from Collection… to Evolution"）、smixs/skill-conductor 212★、hqhq1025/skill-optimizer 193★、microsoft/SkillLens 184★ | **否** |
+| `"SKILL.md" agent` | 3065 | microsoft/SkillOpt 19091★、bergside/awesome-design-skills 3669★、Illyism/seo-skills 1261★、EverMind-AI/SkillCorpus 704★ | **否** |
+| `self-improving agent skills` | 361 | withkynam/vibecode-pro-max-kit 1172★、Kulaxyz/self-learning-skills 972★、pskoett/self-improving-agent 792★（116 fork / 20 条真实用户 issue） | **否** |
+
+对手侧的真实需求信号（不是 star 泡影）：`agent-skills-platform` 266 fork + 9 条 issue（含 "--without-semantic-recon …"、
+"CONTRIBUTING mandates conventional commits; the last 20 commits on main don't use it" 这类**真实使用者才会提的细节缺陷**）；
+`self-improving-agent` 116 fork + 20 条 issue（版本元数据不一致、升级覆盖本地补丁等）。
+→ 该赛道**有真实用户、有维护问答**，`topic:agent-skills` 这类入口对手全部填满（10~19 个 topics），我们 `[]`。
+
+### 判断翻转（第 5 周）
+前 4 周的结论一直留着一条退路：「也许赛道本来没人要」。
+本周**证伪该退路**：赛道热、有 fork、有真实 issue，而我们 656 个结果里进不了前 10。
+「0 反馈」的归因锁定为**纯自身原因**，且是双因叠加：
+
+1. **不可见**：`description=null`、`topics=[]`、0 tag / 0 release、0 外部反向链接 → GitHub 站内搜索与 Topic 聚合两个入口直接出局（对手 10~19 个 topics）。
+2. **不可用**（第 5 周实测仍全部成立，第 3 周发现至今 3 周未修）：
+   - `skill-protocol --help` → `Unknown command: --help`，**exit=1**
+   - `lifecycle check examples/` → **零输出，exit=0**
+   - `health examples/` → **零输出，exit=0**
+   - `validate_all('.')` → `validated 0`，**exit=0**（CI 打印「✅ All 0 skills valid」）
+   - README 第一行 `pip install skill-protocol` → PyPI **404**（包从未上架）
+
+### 差异化诚实判定（本周必须回答，否则不配再发第 6 份报告）
+- **代码层不成立**：本仓可发布代码 486 行（`cli.py` 81 / `lifecycle.py` 195 / `matcher.py` 86 / `validator.py` 56 / `__init__.py` 68），
+  而定位几乎重合的 `agent-skills-platform`（2025-10 建库、MIT、Python、2416★）已把
+  「匹配 → 更新 → 回滚 → 隔离 → 多平台分发」整块做完。我们这层**没有对手做不到的东西**。
+- **文档层成立**：`SPEC.md` 207 行（协议字段与语义）+ `METHODOLOGY.md` 221 行（何时创建/更新/归档的判据）是唯一独有的部分，
+  且与 `skill:open-source-readiness-assessment` §3 的判断一致——**价值在判据，不在代码量**。
+→ 本仓的正解形态是 **A 层方法论仓**（协议 + 判据 + 一份与对手的差异表），不是 B 层工具链仓。
+
+### 待办（第 5 版，重排）
+- [ ] **P0 要一个判决，不要第六条建议**：「保代码层」还是「降为 A 层方法论仓」。连着 5 周、5 版待办同一件事未决，本身已是结论。
+- [ ] P0（保代码层时唯一动作，约 0.5 天）：应用 `2026-11-09-silent-failure-fix.patch`（1 条 `git apply` + 回归）→ 补 description + 5 个 topics（对齐对手：`agent-skills` / `ai-agents` / `claude-code` / `codex` / `skill-library`）→ 打 v1.0.0 + Release → PyPI 上架 `skill-protocol`（名字仍 404 可用）。
+- [ ] P1 巡检频率改**月度**：连续 5 周 0 外部事件，周频产出只剩自己的 commit（`pushed_at` 一直被自己的周报刷新）。
+- [ ] P2（转 A 层时）：README 首段必须写「与 agent-skills-platform / skills-vote / skill-conductor 的差异表」，写不出差异就没有存在理由。
+
+### 阻塞（未变，第 5 周）
+- 无 GitHub PAT（`~/.hermes/.env` `GITHUB_TOKEN` 仍注释）→ `/traffic/views`、`/traffic/clones` 401。
+  这是区分「没人来」vs「来了没转化」的唯一硬数据；本周已用赛道基准法绕开该盲区（对手有流量证明需求存在），但仍无法量化自己。
